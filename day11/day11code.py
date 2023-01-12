@@ -25,10 +25,7 @@ def divisible_test(numerator, divisor):
     else:
         return False
 
-# class Monkey:
-#     def __init__(self, items, operation, test, action)
-
-input = test_list
+input = full_list
 
 monkeys = {}
 
@@ -117,3 +114,69 @@ def monkey_business_calculator(monkey_dict):
 part_1_answer = monkey_business_calculator(monkey_dict)
 
 print('Part 1: ', part_1_answer)
+
+input = full_list
+
+monkey_dict = monkey_dict_creator(input)
+
+def lcd_calculator(monkey_dict):
+
+    lcd = 1
+
+    for monkey in monkey_dict.items():
+        lcd = lcd * int(monkey[1]['test-divisor'])
+        
+    return lcd
+
+common_denominator = lcd_calculator(monkey_dict)
+
+def new_game(monkey_dict, rounds):
+    r = rounds
+    while r > 0:
+        for monkey in monkey_dict.items():
+            while len(monkey[1]['items']) > 0:
+
+                stress_value = monkey[1]['items'][0]
+                operator = monkey[1]['operation']['operator']
+                num = monkey[1]['operation']['num']
+
+                monkey[1]['inspections'] += 1
+
+                if operator == '+':
+                    stress_value = stress_value + int(num)
+                else:
+                    if num == 'old':
+                        num = stress_value
+                    stress_value = stress_value * int(num)
+      
+                monkey[1]['items'].pop(0)
+
+                stress_value %= common_denominator
+
+                receiver = ''
+
+                if stress_value % int(monkey[1]['test-divisor']) == 0:
+                    receiver = monkey[1]['if-true']
+                else:
+                    receiver = monkey[1]['if-false']
+                
+                monkey_dict[f'Monkey {receiver}']['items'].append(stress_value)
+
+        r -= 1
+
+    return monkey_dict
+
+monkey_dict = new_game(monkey_dict, 10000)
+
+def monkey_business_calculator(monkey_dict):
+    active_monkeys = [0]
+    for monkey in monkey_dict.items():
+        if monkey[1]['inspections'] > active_monkeys[0]:
+            active_monkeys.insert(0, monkey[1]['inspections'])
+        elif monkey[1]['inspections'] > active_monkeys[1]:
+            active_monkeys.insert(1, monkey[1]['inspections'])
+    return active_monkeys[0] * active_monkeys[1]
+
+part_2_answer = monkey_business_calculator(monkey_dict)
+
+print('Part 2: ', part_2_answer)
