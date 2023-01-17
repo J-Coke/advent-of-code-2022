@@ -11,47 +11,29 @@ def input_formatter(input):
 
     for topidx, signal in enumerate(left_right_input):
         for bottomidx, side in enumerate(signal):
-            # print(side)
             left_right_input[topidx][bottomidx] = ast.literal_eval(side)
     return left_right_input
 
 test_input = input_formatter(test_list)
 full_input = input_formatter(full_list)
 
-def correct_order_comparer(left, right):
-    print('called', left, right)
-    global correct_order
-    correct_order = True
-    count = 0
-    # if count == 0:
-    #     if len(left) > len(right):
-    #         return False
-    #     else:
-    #         count = 1
-    def value_comparer(left, right):
-        print(left, right, 'line 32')
+def value_comparer(left, right):
         if isinstance(left, list) and isinstance(right, list):
             if len(left) == 0:
                 return True
             elif len(right) == 0:
                 return False
         for index, (left_value, right_value) in enumerate(zip(left, right)):
-            print(index, left_value, right_value, '24')
             if type(left_value) != type(right_value):
-                # print(isinstance(right_value, int))
                 if isinstance(left_value, int):
                     left[index] = [left_value]
-                    # print(left, right, "29")
                     return value_comparer(left, right)
                 elif isinstance(right_value, int):
                     right[index] = [right_value]
-                    # print(left, right, "32")
                     return value_comparer(left, right)
             if isinstance(left_value, list) and isinstance(right_value, list):
-                print(left_value, right_value, value_comparer(left_value, right_value), '35')
                 global correct_order
                 correct_order = value_comparer(left_value, right_value)
-            # print(left_value, right_value, '37')
             if left_value > right_value:
                 correct_order = False
                 return correct_order
@@ -59,18 +41,20 @@ def correct_order_comparer(left, right):
                 return True
             elif index == len(right) - 1 and index != len(left) - 1:
                 return False
-            # elif index == len(right) - 1 and index == len(left) - 1:
         return correct_order
+
+def correct_order_comparer(left, right):
+    global correct_order
+    correct_order = True
+    
     return value_comparer(left, right)
 
 def part_1_answer_finder(input):
-    print(len(input))
     count = 1
     wrong = 0
     total = 0
     all = 0
     for signal in input:
-        print(count, total, wrong, all, "start for")
         if correct_order_comparer(signal[0], signal[1]):
             total += count
             # print(count, total)
@@ -85,3 +69,51 @@ def part_1_answer_finder(input):
     return total
 
 print('Part 1: ', part_1_answer_finder(full_input))
+
+with open('input.txt', "r") as input:
+    full_list = input.read().split('\n')
+
+with open('test-input.txt', "r") as test_input:
+    test_list = test_input.read().split('\n')
+
+def input_formatter(input):
+
+    formatted_input = []
+
+    for signal in input:
+        if len(signal) > 0:
+            formatted_input.append(ast.literal_eval(signal))
+    return formatted_input
+
+test_input = input_formatter(test_list)
+full_input = input_formatter(full_list)
+global ordered_signals
+ordered_signals = [[[2]], [[6]]]
+twoidx = 0
+sixidx = 1
+
+def signal_sorter(input):
+    unsorted_list = input
+    for unsortedidx, signal in enumerate(unsorted_list):
+        for idx, sig in enumerate(ordered_signals):
+            if value_comparer(signal, sig):
+                global twoidx
+                global sixidx
+                if idx <= twoidx:
+                    twoidx += 1
+                    sixidx += 1
+                elif idx <= sixidx:
+                    sixidx += 1
+                ordered_signals.insert(idx, signal)
+                signal_sorter(unsorted_list[unsortedidx + 1:])
+                break
+            elif idx == len(ordered_signals) - 1:
+                ordered_signals.append(signal)
+                signal_sorter(unsorted_list[unsortedidx + 1:])
+                break
+            else:
+                continue
+        break
+    return (twoidx + 1) * (sixidx + 1)
+
+print('Part 2: ', signal_sorter(full_input))
